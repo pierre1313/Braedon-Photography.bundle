@@ -30,7 +30,7 @@ def MainMenu():
 def PictureMenu(sender, url):
   dir = MediaContainer(viewGroup="Pictures", title2=sender.itemTitle)
   count = 1
-  for img in HTML.ElementFromURL(url, True).xpath('//img'):
+  for img in HTML.ElementFromURL(url).xpath('//img'):
     if img.get('src').find('/wp-content/uploads') != -1:
       url = img.get('src')
       dir.Append(PhotoItem(url, title='Photo %d' % count, thumb=url))
