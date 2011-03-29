@@ -1,7 +1,3 @@
-from PMS import *
-from PMS.Objects import *
-from PMS.Shortcuts import *
-
 import re
 
 PLUGIN_PREFIX   = "/photos/BraedonPhotography"
@@ -14,13 +10,14 @@ def Start():
   Plugin.AddViewGroup("Pictures", viewMode="Pictures", mediaType="photos")
   Plugin.AddViewGroup("Info", viewMode="InfoList", mediaType="items")
   MediaContainer.art = "art-default.jpg"
+  DirectoryItem.thumb = "icon-default.png"
+
 ####################################################################################################
 def MainMenu():
   dir = MediaContainer(viewGroup="Info", title1="Braedon Photography")
   for item in RSS.FeedFromURL(RSS_FEED).entries:
-    entry = XML.ElementFromString(item.content[0].value, True)
+    entry = HTML.ElementFromString(item.content[0].value)
     imgs = entry.xpath('//img')
-    Log(imgs)
     if len(imgs) >= 1:
       thumb = ''
       for img in imgs:
@@ -33,7 +30,7 @@ def MainMenu():
 def PictureMenu(sender, url):
   dir = MediaContainer(viewGroup="Pictures", title2=sender.itemTitle)
   count = 1
-  for img in XML.ElementFromURL(url, True).xpath('//img'):
+  for img in HTML.ElementFromURL(url, True).xpath('//img'):
     if img.get('src').find('/wp-content/uploads') != -1:
       url = img.get('src')
       dir.Append(PhotoItem(url, title='Photo %d' % count, thumb=url))
