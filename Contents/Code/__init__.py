@@ -15,23 +15,24 @@ def Start():
 ####################################################################################################
 def MainMenu():
   dir = MediaContainer(viewGroup="Info", title1="Braedon Photography")
-  for item in RSS.FeedFromURL(RSS_FEED).entries:
-    entry = HTML.ElementFromString(item.content[0].value)
-    imgs = entry.xpath('//img')
-    if len(imgs) >= 1:
-      thumb = ''
-      for img in imgs:
-        if img.get('src').find('http://braedonsblog.com/wp-content/uploads') != -1:
-          thumb = img.get('src')
-          
-      dir.Append(Function(DirectoryItem(PictureMenu, title=item.title, thumb=thumb, summary=item.description), url=item.link))
+  for item in XML.ElementFromURL(RSS_FEED).xpath("//item"):
+    title = item.xpath('.//title')[0].text
+    url = item.xpath('.//link')[0].text
+    raw_summary = HTML.StringFromElement(item.xpath('.//description')[0]).replace(']]','').replace('<![CDATA[','').replace('&gt;','>').replace('&lt;','<')#.text
+    summary = HTML.ElementFromString(raw_summary).text_content()
+    try:
+      thumb = HTML.ElementFromString(raw_summary).xpath('.//img')[0].get('src')
+    except:
+      thumb = None
+   
+    dir.Append(Function(DirectoryItem(PictureMenu, title=title, thumb=thumb, summary=summary), url=url))
   return dir
 
 def PictureMenu(sender, url):
   dir = MediaContainer(viewGroup="Pictures", title2=sender.itemTitle)
   count = 1
   for img in HTML.ElementFromURL(url).xpath('//img'):
-    if img.get('src').find('/wp-content/uploads') != -1:
+    if img.get('src').find('osmek') != -1:
       url = img.get('src')
       dir.Append(PhotoItem(url, title='Photo %d' % count, thumb=url))
       count += 1
